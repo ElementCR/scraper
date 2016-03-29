@@ -2,47 +2,32 @@
 const SEARCH_BASE = 'http://assessor.hamiltontn.gov/';
 const SEARCH_URL = 'http://assessor.hamiltontn.gov/search.aspx';
 
-var fs = require('fs');
+var scraper = require('./scraper');
+
 var request = require('request')
-var cheerio = require('cheerio');
 var argv = require('minimist')(process.argv.slice(2));
 
-var formObj = {};
+var assert = require('assert');
+// var Listing = require('./models/listing');
 
-request = request.defaults( { jar: true } );
-formObj.SearchStreetName = argv.name || '';
-formObj.SearchStreetNumber = argv.number || '';
-formObj.SearchParcel = argv.parcel || '';
-formObj.SearchOwner  = argv.owner || '';
+//var mongoose = require('mongoose');
+// mongoose.connect('mongodb://localhost:27017/nmls');
+// var db = mongoose.connection;
 
+//db.on('error', console.error.bind(console, 'connection error: '));
+//db.once('connect', function() {
+	// we're connected
 
-var scraper = function scraper(err, httpResponse, html) {
-	if (err) throw(err);
-
-	var $ = cheerio.load(html);
-	const cols = [ "parcelId", "location", "owner", "yearBuilt", "totalValue", "squareFootage", "description", "saleDate", "salePrice", "bookPage" ];
-	
-	// parse through the results table
-	$('#T1 tr').each(function(x, rowElement) {
-		// get each row and parse it's childs
-		var row = $(this);
-		var rowObj = {};
-
-		row.find('td').each(function(y, colElement) {
-			var text = $(this).text().replace(/\r?\n|\r/g, '').replace(/\t/g, ' ').trim();
-			rowObj[cols[y]] = text;
-		});
-		if (Object.getOwnPropertyNames(rowObj).length != 0) {
-			console.log(rowObj);
-		}
-	});
-
-	// Check to see if there is a next page and if so, recursively call
-	var next = $("a.button:contains('Next Page')");
-	if (next.length > 0) {
-		request.post( { url: SEARCH_BASE + next.attr('href'), form: formObj }, scraper);
-	}
-};
+console.log(scraper.formObj);
+	request = request.defaults( { jar: true } );
+	scraper.formObj.SearchStreetName = argv.name || '';
+	scraper.formObj.SearchStreetNumber = argv.number || '';
+	scraper.formObj.SearchParcel = argv.parcel || '';
+	scraper.formObj.SearchOwner  = argv.owner || '';
 
 
-request.post({ url: SEARCH_URL,	form: formObj }, scraper);
+console.log(scraper.formObj);
+console.log(scraper.foo());
+console.log('calling the scrape func');
+//});
+request.post({ url: SEARCH_URL,	form: scraper.formObj }, scraper.scrapeSite);
