@@ -1,0 +1,16 @@
+{
+  "name": "nmls",
+  "version": "1.0.0",
+  "description": "Real Estate Information Aggregator",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Andrew Pierce",
+  "license": "ISC",
+  "dependencies": {
+    "cheerio": "^0.20.0",
+    "minimist": "^1.2.0",
+    "request": "^2.69.0"
+  }
+}
