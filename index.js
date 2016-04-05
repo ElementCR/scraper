@@ -8,5 +8,11 @@ scraper.formObj.SearchStreetNumber = argv.number || '';
 scraper.formObj.SearchParcel = argv.parcel || '';
 scraper.formObj.SearchOwner  = argv.owner || '';
 
-scraper.scrapeIt();
+// scraper.scrapeIt();
 
+console.log('calling scraper.scrape');
+
+scraper.scrape(); // .then(function(res) {
+//	console.log('callback of scrape');
+//	console.log(res);
+// });

@@ -5,39 +5,44 @@ const SEARCH_BASE = 'http://assessor.hamiltontn.gov/';
 const SEARCH_URL = 'http://assessor.hamiltontn.gov/search.aspx';
 var formObj = {};
 
+var results = [];
 
+var scrapeSite = function() {
+	console.log('scrapeSite called');
+	return new Promise(function(resolve, reject) {
+		
+		request = request.defaults( { jar: true } );
+		request.post({ url: SEARCH_URL, form: scraper.formObj }, function(err, httpResponse, html) {
+			
+			// if (err) throw(err);
+			if (err) reject(err);
 
-var scrapeSite = function scrapeSite(err, httpResponse, html) {
-	if (err) throw(err);
+			var $ = cheerio.load(html);
+			const cols = [ "parcelId", "location", "owner", "yearBuilt", "totalValue", "squareFootage", "description", "saleDate", "salePrice", "bookPage" ];
+			
+			// parse through the results table
+			$('#T1 tr').each(function(x, rowElement) {
+				// get each row and parse it's childs
+				var row = $(this);
+				var rowObj = {};
 
-	var $ = cheerio.load(html);
-	const cols = [ "parcelId", "location", "owner", "yearBuilt", "totalValue", "squareFootage", "description", "saleDate", "salePrice", "bookPage" ];
-	
-	// parse through the results table
-	$('#T1 tr').each(function(x, rowElement) {
-		// get each row and parse it's childs
-		var row = $(this);
-		var rowObj = {};
-
-		row.find('td').each(function(y, colElement) {
-			var text = $(this).text().replace(/\r?\n|\r/g, '').replace(/\t/g, ' ').trim();
-			rowObj[cols[y]] = text;
+				row.find('td').each(function(y, colElement) {
+					var text = $(this).text().replace(/\r?\n|\r/g, '').replace(/\t/g, ' ').trim();
+					rowObj[cols[y]] = text;
+				});
+				if (Object.getOwnPropertyNames(rowObj).length != 0) {
+					console.log(rowObj);
+					results.push(rowObj)
+				}
+			});
+			// Check to see if there is a next page and if so, recursively call
+			//var next = $("a.button:contains('Next Page')");
+			//if (next.length > 0) {
+			//	request.post( { url: SEARCH_BASE + next.attr('href'), form: formObj }, scrapeSite);
+			//}
+			resolve(results);
 		});
-		if (Object.getOwnPropertyNames(rowObj).length != 0) {
-
-			// var list = new Listing.Listing(rowObj);
-			//console.log(list);
-			//list.save(function(err, list) {
-			//	if (err) return console.log(err);
-			console.log(rowObj);
-			//});
-		}
 	});
-	// Check to see if there is a next page and if so, recursively call
-	var next = $("a.button:contains('Next Page')");
-	if (next.length > 0) {
-		request.post( { url: SEARCH_BASE + next.attr('href'), form: formObj }, scrapeSite);
-	}
 };
 
 
@@ -45,12 +50,18 @@ var scrapeIt = function scrapeIt() {
 	request = request.defaults( { jar: true } );
 	request.post({ url: SEARCH_URL,	form: scraper.formObj }, scraper.scrapeSite);
 };
+
+var scrape = function scrape() {
+	console.log('scrape called');
+	scrapeSite().then(function(res) { console.log(res) });
+};
 	
 
 var scraper = {
 	formObj: {},
 	scrapeSite: scrapeSite,
 	scrapeIt: scrapeIt,
+	scrape: scrape
 };
 
 //exports.formObj = formObj;
