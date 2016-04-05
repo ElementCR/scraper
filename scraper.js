@@ -31,7 +31,7 @@ var scrapeSite = function() {
 					rowObj[cols[y]] = text;
 				});
 				if (Object.getOwnPropertyNames(rowObj).length != 0) {
-					console.log(rowObj);
+					// console.log(rowObj);
 					results.push(rowObj)
 				}
 			});
@@ -53,7 +53,12 @@ var scrapeIt = function scrapeIt() {
 
 var scrape = function scrape() {
 	console.log('scrape called');
-	scrapeSite().then(function(res) { console.log(res) });
+	return new Promise(function(resolve, reject) {
+		scrapeSite().then(function(res) {
+			console.log('We got back from the promise....');
+			resolve(res);
+		});
+	});
 };
 	
 

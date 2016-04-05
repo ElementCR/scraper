@@ -12,7 +12,8 @@ scraper.formObj.SearchOwner  = argv.owner || '';
 
 console.log('calling scraper.scrape');
 
-scraper.scrape(); // .then(function(res) {
-//	console.log('callback of scrape');
-//	console.log(res);
-// });
+scraper.scrape().then(function(res) {
+	console.log('callback of scrape');
+	console.log(' len: ' + res.length);
+	// console.log(res);
+ });
