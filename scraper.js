@@ -13,8 +13,6 @@ var scrapeSite = function() {
 		
 		request = request.defaults( { jar: true } );
 		request.post({ url: SEARCH_URL, form: scraper.formObj }, function(err, httpResponse, html) {
-			
-			// if (err) throw(err);
 			if (err) reject(err);
 
 			var $ = cheerio.load(html);
@@ -31,15 +29,22 @@ var scrapeSite = function() {
 					rowObj[cols[y]] = text;
 				});
 				if (Object.getOwnPropertyNames(rowObj).length != 0) {
-					// console.log(rowObj);
+					parcelBits = rowObj.parcelId.split(' ');
+					rowObj.controlMap = parcelBits[0];
+					rowObj.group = parcelBits[1];
+					rowObj.parcel = parcelBits[2];
 					results.push(rowObj)
 				}
 			});
 			// Check to see if there is a next page and if so, recursively call
-			//var next = $("a.button:contains('Next Page')");
-			//if (next.length > 0) {
-			//	request.post( { url: SEARCH_BASE + next.attr('href'), form: formObj }, scrapeSite);
-			//}
+			var next = $("a.button:contains('Next Page')");
+			if (next.length > 0) {
+				scraper.nextPageUrl = SEARCH_BASE + next.attr('href');
+				// request.post( { url: SEARCH_BASE + next.attr('href'), form: formObj }, scrapeSite);
+			}
+			else {
+				scraper.nextPageUrl = '';
+			}
 			resolve(results);
 		});
 	});
@@ -64,6 +69,7 @@ var scrape = function scrape() {
 
 var scraper = {
 	formObj: {},
+	nextPageUrl: '',
 	scrapeSite: scrapeSite,
 	scrapeIt: scrapeIt,
 	scrape: scrape
