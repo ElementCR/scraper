@@ -27,6 +27,12 @@ var scrapeSite = function() {
 				row.find('td').each(function(y, colElement) {
 					var text = $(this).text().replace(/\r?\n|\r/g, '').replace(/\t/g, ' ').trim();
 					rowObj[cols[y]] = text;
+
+					if (y === 0) {
+						// get the account number from the href here
+						rowObj.accountUrl = $(this).children().first().attr('href');
+						rowObj.accountNumber = rowObj.accountUrl.split('=')[1];
+					}
 				});
 				if (Object.getOwnPropertyNames(rowObj).length != 0) {
 					parcelBits = rowObj.parcelId.split(' ');
@@ -50,12 +56,6 @@ var scrapeSite = function() {
 	});
 };
 
-
-var scrapeIt = function scrapeIt() {
-	request = request.defaults( { jar: true } );
-	request.post({ url: SEARCH_URL,	form: scraper.formObj }, scraper.scrapeSite);
-};
-
 var scrape = function scrape() {
 	console.log('scrape called');
 	return new Promise(function(resolve, reject) {
@@ -71,12 +71,7 @@ var scraper = {
 	formObj: {},
 	nextPageUrl: '',
 	scrapeSite: scrapeSite,
-	scrapeIt: scrapeIt,
 	scrape: scrape
 };
-
-//exports.formObj = formObj;
-//exports.foo = function() { return 'foo'; }
-//exports.scrapeSite = scrapeSite;
 
 module.exports = scraper;
