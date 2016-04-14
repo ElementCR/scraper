@@ -1,5 +1,6 @@
 var cheerio = require('cheerio');
 var request = require('request');
+request = request.defaults( { jar: true } );
 
 const SEARCH_BASE = 'http://assessor.hamiltontn.gov/';
 const SEARCH_URL = 'http://assessor.hamiltontn.gov/search.aspx';
@@ -7,11 +8,24 @@ var formObj = {};
 
 var results = [];
 
+var scrapePrintableCard = function(results) {
+	return new Promise(function(resolve, reject) {
+		debugger;
+		console.log('scrapePrintableCard called with ' + results[0].accountNumber);
+		var pc = {
+			mailingAddress: {
+				owner: 'PIERCE ANDREW M'
+			}
+		};
+		results[0].printableCard = pc;
+		resolve(results);
+	});
+};
+
 var scrapeSite = function() {
 	console.log('scrapeSite called');
 	return new Promise(function(resolve, reject) {
 		
-		request = request.defaults( { jar: true } );
 		request.post({ url: SEARCH_URL, form: scraper.formObj }, function(err, httpResponse, html) {
 			if (err) reject(err);
 
@@ -42,6 +56,7 @@ var scrapeSite = function() {
 					results.push(rowObj)
 				}
 			});
+
 			// Check to see if there is a next page and if so, recursively call
 			var next = $("a.button:contains('Next Page')");
 			if (next.length > 0) {
@@ -59,8 +74,9 @@ var scrapeSite = function() {
 var scrape = function scrape() {
 	console.log('scrape called');
 	return new Promise(function(resolve, reject) {
-		scrapeSite().then(function(res) {
-			console.log('We got back from the promise....');
+		
+		scrapeSite().then(scrapePrintableCard).then(function(res) {
+			debugger;
 			resolve(res);
 		});
 	});
