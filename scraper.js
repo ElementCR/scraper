@@ -9,16 +9,30 @@ var formObj = {};
 var results = [];
 
 var scrapePrintableCard = function(results) {
+	console.log('scrapePrintableCard called with ' + results[0].accountNumber);
+	
 	return new Promise(function(resolve, reject) {
-		debugger;
-		console.log('scrapePrintableCard called with ' + results[0].accountNumber);
-		var pc = {
-			mailingAddress: {
-				owner: 'PIERCE ANDREW M'
-			}
-		};
-		results[0].printableCard = pc;
-		resolve(results);
+
+		var pcUrl = SEARCH_BASE + 'Summary.aspx?AccountNumber=' + results[0].accountNumber;
+
+		request.post({ url: pcUrl }, function(err, httpResponse, html) {
+			if (err) reject(err);
+
+			debugger;
+			var $ = cheerio.load(html);
+			var mailingAddr = $('table.old-parcel-id');
+			
+			
+			var pc = {
+				mailingAddress: {
+					owner: 'PIERCE ANDREW M'
+				}
+			};
+			results[0].printableCard = pc;
+			resolve(results);
+			
+		});
+		
 	});
 };
 
