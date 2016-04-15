@@ -1,3 +1,5 @@
+'use strict';
+
 var cheerio = require('cheerio');
 var request = require('request');
 request = request.defaults( { jar: true } );
@@ -12,27 +14,56 @@ var scrapePrintableCard = function(results) {
 	console.log('scrapePrintableCard called with ' + results[0].accountNumber);
 	
 	return new Promise(function(resolve, reject) {
-
+		var pc = {
+			mailingAddress: {}
+		};
 		var pcUrl = SEARCH_BASE + 'Summary.aspx?AccountNumber=' + results[0].accountNumber;
 
 		request.post({ url: pcUrl }, function(err, httpResponse, html) {
 			if (err) reject(err);
 
-			debugger;
 			var $ = cheerio.load(html);
+
+			var tables = $('table');
+			// debugger;
+			
+			// Get the address section
 			var mailingAddr = $('table.old-parcel-id');
-			
-			
-			var pc = {
-				mailingAddress: {
-					owner: 'PIERCE ANDREW M'
+
+			mailingAddr.find('td').each(function(x, col) {
+				let td = $(this);
+				// debugger;
+				if (td.children().first().text() === 'Owner') {
+					// get the next element
+					let sib = td.siblings().first();
+					pc.mailingAddress.owner = sib.text();
 				}
-			};
+				if (td.children().first().text() === 'Address') {
+					// get the next element
+					let sib = td.siblings().first();
+					pc.mailingAddress.address = sib.text();
+				}
+				if (td.children().first().text() === 'City') {
+					// debugger;
+					// get the next element
+					let sib = td.siblings().next().next().next();
+					pc.mailingAddress.city = sib.text();
+				}
+				if (td.children().first().text() === 'State') {
+					// get the next element
+					let sib = td.siblings().next().next().next();
+					pc.mailingAddress.state = sib.text();
+				}
+				if (td.children().first().text() === 'Zip') {
+					// get the next element
+					let sib = td.siblings().next().next().next();
+					pc.mailingAddress.zip = sib.text();
+				}
+			});
+			
 			results[0].printableCard = pc;
 			resolve(results);
-			
 		});
-		
 	});
 };
 
@@ -63,7 +94,7 @@ var scrapeSite = function() {
 					}
 				});
 				if (Object.getOwnPropertyNames(rowObj).length != 0) {
-					parcelBits = rowObj.parcelId.split(' ');
+					let parcelBits = rowObj.parcelId.split(' ');
 					rowObj.controlMap = parcelBits[0];
 					rowObj.group = parcelBits[1];
 					rowObj.parcel = parcelBits[2];
@@ -90,7 +121,7 @@ var scrape = function scrape() {
 	return new Promise(function(resolve, reject) {
 		
 		scrapeSite().then(scrapePrintableCard).then(function(res) {
-			debugger;
+			// debugger;
 			resolve(res);
 		});
 	});
