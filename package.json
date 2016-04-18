@@ -11,8 +11,9 @@
   "dependencies": {
     "cheerio": "^0.20.0",
     "minimist": "^1.2.0",
-    "mongodb": "^2.1.13",
-    "mongoose": "^4.4.10",
-    "request": "^2.69.0"
+    "pg": "^4.5.3",
+    "pg-hstore": "^2.3.2",
+    "request": "^2.69.0",
+    "sequelize": "^3.21.0"
   }
 }
