@@ -2,6 +2,9 @@
 
 var cheerio = require('cheerio');
 var request = require('request');
+var Property = require('./models/property');
+var _ = require('lodash-node');
+
 request = request.defaults( { jar: true } );
 
 const SEARCH_BASE = 'http://assessor.hamiltontn.gov/';
@@ -93,6 +96,15 @@ var scrapeSite = function() {
 						rowObj.accountNumber = rowObj.accountUrl.split('=')[1];
 					}
 				});
+
+				// fix the values that should be numbers
+				debugger;
+				if (!_.isEmpty(rowObj)) {
+					rowObj.salePrice = rowObj.salePrice.replace(/\$|,/g, "");
+					rowObj.totalValue = rowObj.totalValue.replace(/\$|,/g, "");
+					rowObj.squareFootage = rowObj.squareFootage.replace(/,/g, "");
+				}
+				
 				if (Object.getOwnPropertyNames(rowObj).length != 0) {
 					let parcelBits = rowObj.parcelId.split(' ');
 					rowObj.controlMap = parcelBits[0];
@@ -121,7 +133,14 @@ var scrape = function scrape() {
 	return new Promise(function(resolve, reject) {
 		
 		scrapeSite().then(scrapePrintableCard).then(function(res) {
-			// debugger;
+
+			// add this result to the database
+			res.forEach(function(result) {
+				console.log(result);
+				prop = Property.create(result).then(function() {
+					console.log('added record ' + result.parcelId);
+				});
+			});
 			resolve(res);
 		});
 	});
