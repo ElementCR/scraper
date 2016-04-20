@@ -14,7 +14,6 @@ var formObj = {};
 var results = [];
 
 var scrapePrintableCard = function(results) {
-	console.log('scrapePrintableCard called with ' + results[0].accountNumber);
 	
 	return new Promise(function(resolve, reject) {
 		var pc = {
@@ -28,7 +27,6 @@ var scrapePrintableCard = function(results) {
 			var $ = cheerio.load(html);
 
 			var tables = $('table');
-			// debugger;
 			
 			// Get the address section
 			var mailingAddr = $('table.old-parcel-id');
@@ -47,7 +45,6 @@ var scrapePrintableCard = function(results) {
 					pc.mailingAddress.address = sib.text();
 				}
 				if (td.children().first().text() === 'City') {
-					// debugger;
 					// get the next element
 					let sib = td.siblings().next().next().next();
 					pc.mailingAddress.city = sib.text();
@@ -71,7 +68,6 @@ var scrapePrintableCard = function(results) {
 };
 
 var scrapeSite = function() {
-	console.log('scrapeSite called');
 	return new Promise(function(resolve, reject) {
 		
 		request.post({ url: SEARCH_URL, form: scraper.formObj }, function(err, httpResponse, html) {
@@ -98,11 +94,25 @@ var scrapeSite = function() {
 				});
 
 				// fix the values that should be numbers
-				debugger;
 				if (!_.isEmpty(rowObj)) {
-					rowObj.salePrice = rowObj.salePrice.replace(/\$|,/g, "");
-					rowObj.totalValue = rowObj.totalValue.replace(/\$|,/g, "");
-					rowObj.squareFootage = rowObj.squareFootage.replace(/,/g, "");
+					if (!_.isEmpty(rowObj.salePrice)) {
+						rowObj.salePrice = parseInt(rowObj.salePrice.replace(/\$|,/g, ""));
+					}
+					else {
+						rowObj.salePrice = 0;
+					}
+					if (!_.isEmpty(rowObj.totalValue)) {
+						rowObj.totalValue = parseInt(rowObj.totalValue.replace(/\$|,/g, ""));
+					}
+					else {
+						rowObj.totalValue = 0;
+					}
+					if (!_.isEmpty(rowObj.squareFootage)) {
+						rowObj.squareFootage = parseInt(rowObj.squareFootage.replace(/,/g, ""));
+					}
+					else {
+						rowObj.squareFootage = 0;
+					}
 				}
 				
 				if (Object.getOwnPropertyNames(rowObj).length != 0) {
@@ -129,17 +139,13 @@ var scrapeSite = function() {
 };
 
 var scrape = function scrape() {
-	console.log('scrape called');
 	return new Promise(function(resolve, reject) {
 		
 		scrapeSite().then(scrapePrintableCard).then(function(res) {
 
 			// add this result to the database
 			res.forEach(function(result) {
-				console.log(result);
-				prop = Property.create(result).then(function() {
-					console.log('added record ' + result.parcelId);
-				});
+				var prop = Property.create(result);
 			});
 			resolve(res);
 		});
