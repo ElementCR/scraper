@@ -74,11 +74,12 @@ var scrapeSite = function() {
 			if (err) reject(err);
 
 			var $ = cheerio.load(html);
-			const cols = [ "parcelId", "location", "owner", "yearBuilt", "totalValue", "squareFootage", "description", "saleDate", "salePrice", "bookPage" ];
+			const cols = [ "parcelId", "location", "owner", "yearBuilt", "totalValue", "squareFootage",
+										 "description", "saleDate", "salePrice", "bookPage" ];
 			
 			// parse through the results table
 			$('#T1 tr').each(function(x, rowElement) {
-				// get each row and parse it's childs
+				// get each row and parse it's children
 				var row = $(this);
 				var rowObj = {};
 
@@ -133,6 +134,7 @@ var scrapeSite = function() {
 			else {
 				scraper.nextPageUrl = '';
 			}
+			console.log("Done scraping with " + results.length + " results");
 			resolve(results);
 		});
 	});
@@ -140,9 +142,7 @@ var scrapeSite = function() {
 
 var scrape = function scrape() {
 	return new Promise(function(resolve, reject) {
-		
 		scrapeSite().then(scrapePrintableCard).then(function(res) {
-
 			// add this result to the database
 			res.forEach(function(result) {
 				var prop = Property.create(result);

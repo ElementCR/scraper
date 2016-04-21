@@ -10,11 +10,15 @@
   "license": "ISC",
   "dependencies": {
     "cheerio": "^0.20.0",
+    "handlebars": "^4.0.5",
+    "hapi": "^13.3.0",
     "lodash-node": "^3.10.2",
     "minimist": "^1.2.0",
     "pg": "^4.5.3",
     "pg-hstore": "^2.3.2",
+    "pug": "^2.0.0-alpha6",
     "request": "^2.69.0",
-    "sequelize": "^3.21.0"
+    "sequelize": "^3.21.0",
+    "vision": "^4.1.0"
   }
 }
